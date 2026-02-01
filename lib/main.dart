@@ -7,15 +7,21 @@ import 'features/favorite_movies/injection.dart';
 import 'features/favorite_movies/presentation/bloc/favorite_movies_bloc.dart';
 import 'features/favorite_movies/presentation/pages/favorite_movies_page.dart';
 
-@pragma('vm:entry-point')
 /// Super-App Documentation:
-/// First array of arguments is the API token
-/// Second array of arguments is the account ID
-void mainFavorite(List<String> args) {
-  final apiToken = args.first;
-  final accountId = args[1];
+/// [args]: [apiToken, accountId, baseUrl, appName, imageBaseUrl]
+void _initFromSuperAppArgs(List<String> args) {
+  ApiConstants.init(
+    apiToken: args[0],
+    accountId: args[1],
+    baseUrl: args[2],
+    appName: args[3],
+    imageBaseUrl: args[4],
+  );
+}
 
-  ApiConstants.init(apiToken: apiToken, accountId: accountId);
+@pragma('vm:entry-point')
+void mainFavorite(List<String> args) {
+  _initFromSuperAppArgs(args);
 
   final nativeCallService = NativeCallService();
 
