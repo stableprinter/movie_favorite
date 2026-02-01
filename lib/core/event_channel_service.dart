@@ -21,7 +21,6 @@ class EventChannelService {
   /// Checks if the event is an "onToggleFavorite" event.
   /// Native sends events as Map: {"method": "...", "param": ...}
   static bool _isOnToggleFavorite(dynamic value) {
-    print('fav event channel value: $value');
     if (value is Map) {
       return value['method'] == 'shouldReloadFavorite';
     }

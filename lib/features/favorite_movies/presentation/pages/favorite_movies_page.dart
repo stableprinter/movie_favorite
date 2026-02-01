@@ -32,7 +32,6 @@ class _FavoriteMoviesPageState extends State<FavoriteMoviesPage> {
     context.read<FavoriteMoviesBloc>().add(const LoadFavoriteMovies());
     _scrollController.addListener(_onScroll);
     _toggleFavoriteSubscription = _eventChannelService.onToggleFavoriteStream.listen((_) {
-      print('should reload favorite in bloc');
       if (mounted) {
         context.read<FavoriteMoviesBloc>().add(const RefreshFavoriteMovies());
       }

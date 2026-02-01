@@ -1,62 +1,122 @@
-import 'package:dio/dio.dart';
+import 'package:network_package/network_call.dart' as net;
 
 import 'api_constants.dart';
 
-/// Dio wrapper with baseUrl, timeouts, auth and logging interceptors.
-/// Uses [ApiConstants.instance] for configuration.
-class ApiClient {
-  ApiClient({Dio? dio}) : _dio = dio ?? Dio() {
-    final constants = ApiConstants.instance;
-    _dio
-      ..options.baseUrl = constants.baseUrl
-      ..options.connectTimeout = const Duration(seconds: 30)
-      ..options.receiveTimeout = const Duration(seconds: 30)
-      ..options.sendTimeout = const Duration(seconds: 30)
-      ..interceptors.addAll([
-        _AuthInterceptor(constants.apiToken),
-        _LoggingInterceptor(),
-      ]);
-  }
-
-  final Dio _dio;
-
-  Dio get dio => _dio;
-}
-
-class _AuthInterceptor extends Interceptor {
-  _AuthInterceptor(this._token);
+export 'package:network_package/network_call.dart'
+    show NetworkException, NetworkResponse;
+/// Dio-free interceptor that adds Bearer auth. Token comes from [ApiConstants] when not passed.
+class AuthInterceptor extends net.NetworkInterceptor {
+  AuthInterceptor([String? token]) : _token = token ?? ApiConstants.instance.apiToken;
 
   final String _token;
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    options.headers['Authorization'] = 'Bearer $_token';
-    handler.next(options);
+  void onRequest(net.NetworkRequestContext context, void Function() next) {
+    context.headers['Authorization'] = 'Bearer $_token';
+    next();
   }
 }
 
-class _LoggingInterceptor extends Interceptor {
+/// Dio-free interceptor that logs requests and responses.
+class LoggingInterceptor extends net.NetworkInterceptor {
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+  void onRequest(net.NetworkRequestContext context, void Function() next) {
     // ignore: avoid_print
-    print('[Dio] REQUEST: ${options.method} ${options.uri}');
-    handler.next(options);
+    print('→ ${context.method} ${context.uri}');
+    next();
   }
 
   @override
-  void onResponse(
-    Response response,
-    ResponseInterceptorHandler handler,
-  ) {
+  void onResponse(net.NetworkResponseContext context, void Function() next) {
     // ignore: avoid_print
-    print('[Dio] RESPONSE: ${response.statusCode} ${response.requestOptions.uri}');
-    handler.next(response);
+    print('← ${context.statusCode} ${context.uri}');
+    next();
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
+  void onError(net.NetworkErrorContext context, void Function() next) {
     // ignore: avoid_print
-    print('[Dio] ERROR: ${err.type} ${err.message} ${err.requestOptions.uri}');
-    handler.next(err);
+    print('✗ ${context.uri}: ${context.message}');
+    next();
   }
+}
+
+/// API client backed by [net.ApiClient] with Bearer auth and logging.
+/// [baseUrl], [token], and [userId] default to [ApiConstants] when not passed.
+class ApiClient {
+  ApiClient({
+    String? baseUrl,
+    String? token,
+    String? userId,
+  })  : _baseUrl = baseUrl ?? ApiConstants.instance.baseUrl,
+        _userId = userId ?? ApiConstants.instance.accountId {
+    _client = net.ApiClient(
+      baseUrl: _baseUrl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+      interceptors: [
+        AuthInterceptor(token ?? ApiConstants.instance.apiToken),
+        LoggingInterceptor(),
+      ],
+    );
+  }
+
+  final String _baseUrl;
+  final String? _userId;
+  late final net.ApiClient _client;
+
+  String get baseUrl => _baseUrl;
+  String? get userId => _userId;
+
+  Future<net.NetworkResponse<T>> get<T>(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+  }) =>
+      _client.get<T>(path,
+          queryParameters: queryParameters, headers: headers);
+
+  Future<net.NetworkResponse<T>> post<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+  }) =>
+      _client.post<T>(path,
+          data: data,
+          queryParameters: queryParameters,
+          headers: headers);
+
+  Future<net.NetworkResponse<T>> put<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+  }) =>
+      _client.put<T>(path,
+          data: data,
+          queryParameters: queryParameters,
+          headers: headers);
+
+  Future<net.NetworkResponse<T>> patch<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+  }) =>
+      _client.patch<T>(path,
+          data: data,
+          queryParameters: queryParameters,
+          headers: headers);
+
+  Future<net.NetworkResponse<T>> delete<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+  }) =>
+      _client.delete<T>(path,
+          data: data,
+          queryParameters: queryParameters,
+          headers: headers);
 }

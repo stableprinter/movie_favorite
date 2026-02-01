@@ -1,5 +1,4 @@
 import '../../../../core/api_client.dart';
-import '../../../../core/api_constants.dart';
 import '../models/movie_model.dart';
 import 'favorite_movies_remote_datasource.dart';
 
@@ -11,8 +10,9 @@ class FavoriteMoviesRemoteDataSourceImpl
 
   @override
   Future<List<MovieModel>> getFavoriteMovies(int page) async {
-    final response = await _apiClient.dio.get<Map<String, dynamic>>(
-      '/account/${ApiConstants.instance.accountId}/favorite/movies',
+    final accountId = _apiClient.userId ?? '';
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      '/account/$accountId/favorite/movies',
       queryParameters: <String, dynamic>{
         'language': 'en-US',
         'page': page,
@@ -29,8 +29,9 @@ class FavoriteMoviesRemoteDataSourceImpl
 
   @override
   Future<void> toggleFavorite(int mediaId, bool favorite) async {
-    await _apiClient.dio.post<Map<String, dynamic>>(
-      '/account/${ApiConstants.instance.accountId}/favorite',
+    final accountId = _apiClient.userId ?? '';
+    await _apiClient.post<void>(
+      '/account/$accountId/favorite',
       data: <String, dynamic>{
         'media_type': 'movie',
         'media_id': mediaId,

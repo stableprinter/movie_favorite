@@ -123,7 +123,7 @@ class _Poster extends StatelessWidget {
         width: 100,
         height: 150,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
+        errorBuilder: (_, error, stackTrace) => Container(
           width: 100,
           height: 150,
           color: Colors.grey.shade300,
