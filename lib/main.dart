@@ -19,10 +19,7 @@ void _initFromSuperAppArgs(List<String> args) {
   );
 }
 
-@pragma('vm:entry-point')
-void mainFavorite(List<String> args) {
-  _initFromSuperAppArgs(args);
-
+void _runApp() {
   final nativeCallService = NativeCallService();
 
   runApp(
@@ -38,3 +35,21 @@ void mainFavorite(List<String> args) {
     ),
   );
 }
+
+void main() {
+  ApiConstants.init(
+    apiToken: 'mock_token',
+    accountId: 'mock_account',
+    baseUrl: 'https://api.themoviedb.org/3',
+    appName: 'Movie Favorite',
+    imageBaseUrl: 'https://image.tmdb.org/t/p/w500',
+  );
+  _runApp();
+}
+
+@pragma('vm:entry-point')
+void mainFavorite(List<String> args) {
+  _initFromSuperAppArgs(args);
+  _runApp();
+}
+  
