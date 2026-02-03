@@ -16,6 +16,7 @@ void _initFromSuperAppArgs(List<String> args) {
     baseUrl: args[2],
     appName: args[3],
     imageBaseUrl: args[4],
+    brandFontFamily: "BrandFont",
   );
 }
 
@@ -24,6 +25,10 @@ void _runApp() {
 
   runApp(
     MaterialApp(
+      theme: ThemeData(
+        useMaterial3: true,
+        fontFamily: ApiConstants.instance.brandFontFamily,
+      ),
       home: BlocProvider<FavoriteMoviesBloc>(
         create: (_) => createFavoriteMoviesBloc(),
         child: FavoriteMoviesPage(
@@ -43,6 +48,7 @@ void main() {
     baseUrl: 'https://api.themoviedb.org/3',
     appName: 'Movie Favorite',
     imageBaseUrl: 'https://image.tmdb.org/t/p/w500',
+    brandFontFamily: "BrandFont",
   );
   _runApp();
 }
@@ -52,4 +58,3 @@ void mainFavorite(List<String> args) {
   _initFromSuperAppArgs(args);
   _runApp();
 }
-  
