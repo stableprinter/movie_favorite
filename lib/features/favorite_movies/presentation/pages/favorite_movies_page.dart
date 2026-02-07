@@ -65,7 +65,7 @@ class _FavoriteMoviesPageState extends State<FavoriteMoviesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Favorite Movies'),
+        title: const Text('My Favorite Movies v1.0.0'),
       ),
       body: BlocBuilder<FavoriteMoviesBloc, FavoriteMoviesState>(
         builder: (context, state) {
